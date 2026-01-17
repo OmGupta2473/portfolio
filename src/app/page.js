@@ -1,34 +1,16 @@
 "use client";
-// Triggering fresh Vercel build with updated detached glassmorphism modal
+
 import { useRef, useState, useEffect } from "react";
-/** * 1. MOTION/REACT: Standard for React 19 builds.
- * Ensure you have 'framer-motion' installed.
- */
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { ArrowDown, ArrowUpRight, ExternalLink, Github, X, ChevronRight } from "lucide-react";
-
-/** * 2. LENIS: Using the new official React integration.
- * No longer requires '@studio-freight/react-lenis'.
- */
 import { ReactLenis, useLenis } from "lenis/react";
-
-/** * 3. HAMO & TEMPUS: Updated to non-scoped packages.
- * Renamed useFrame to useHamoFrame to avoid conflict with Three.js.
- */
 import { useFrame as useHamoFrame } from "hamo";
 import Tempus from "tempus";
-
 import Matter from "matter-js";
-
-/** * 4. THREE.js: Fiber and Drei.
- * Renamed Three's useFrame to useThreeFrame.
- */
 import { Canvas, useFrame as useThreeFrame } from "@react-three/fiber";
 import { Environment, ContactShadows, Float, Html } from "@react-three/drei";
 import * as THREE from "three";
 import Image from "next/image";
-
-// --- Logic continued below for your components using these imports ---
 
 // --- 1. DATA: PROJECTS ---
 const projects = [
@@ -86,7 +68,7 @@ const projects = [
 const LaptopModel = ({ activeProject }) => {
   const group = useRef();
   
-  useFrame((state) => {
+  useThreeFrame((state) => {
     const t = state.clock.getElapsedTime();
     group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, Math.cos(t / 2) / 20 + 0.25, 0.1);
     group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, Math.sin(t / 4) / 10, 0.1);
