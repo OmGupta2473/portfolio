@@ -2,12 +2,11 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
-import { ArrowDown, ArrowUpRight, ExternalLink, Github, X, ChevronRight } from "lucide-react";
+import { ArrowDown, ArrowUpRight, ExternalLink, Github, X, Globe, ChevronRight } from "lucide-react";
+// 1. IMPORT USELENIS HOOK
 import { ReactLenis, useLenis } from "lenis/react";
-import { useFrame as useHamoFrame } from "hamo";
-import Tempus from "tempus";
 import Matter from "matter-js";
-import { Canvas, useFrame as useThreeFrame } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, ContactShadows, Float, Html } from "@react-three/drei";
 import * as THREE from "three";
 import Image from "next/image";
@@ -16,11 +15,17 @@ import Image from "next/image";
 const projects = [
   {
     id: 1,
-    title: "Enterprise AI Agent System",
+    title: "Enterprise AI Agent",
     category: "AI Architecture",
-    stack: ["Python", "LangChain", "ChromaDB", "Docker", "RAG"],
+    stack: ["Python", "LangChain", "ChromaDB", "Docker"],
     color: "#3b82f6",
     description: "A scalable RAG system for enterprise data retrieval.",
+    longDescription: "Designed a centralized knowledge retrieval system for a large-scale enterprise. The system ingests thousands of PDFs, Docs, and internal wiki pages into a vector database.",
+    challenge: "The primary challenge was handling latency with large-scale vector retrieval while maintaining context accuracy across 100+ document pages.",
+    images: [
+      "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=2000",
+      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=2000"
+    ]
   },
   {
     id: 2,
@@ -28,39 +33,57 @@ const projects = [
     category: "E-Commerce",
     stack: ["React", "Firebase", "Firestore", "Vercel"],
     color: "#ec4899",
-    description: "Full-stack booking & e-commerce platform for a beauty brand.",
+    description: "Full-stack booking & e-commerce platform.",
+    longDescription: "A bespoke e-commerce solution tailored for a boutique nail salon. Features include real-time appointment scheduling, inventory management, and a custom CMS.",
+    challenge: "Synchronizing physical store availability with online bookings in real-time to prevent double-booking slots.",
+    images: [
+      "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=2000",
+      "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=2000"
+    ]
   },
   {
     id: 3,
-    title: "AI PDF Query System",
+    title: "AI PDF Query Tool",
     category: "SaaS Tool",
-    stack: ["Python", "LangChain", "Streamlit", "Vector Search"],
+    stack: ["Python", "LangChain", "Streamlit"],
     color: "#f97316",
-    description: "Intelligent document analysis tool using vector embeddings.",
+    description: "Intelligent document analysis tool.",
+    longDescription: "A SaaS tool allowing users to upload legal contracts and ask complex questions. The AI highlights specific clauses and checks for compliance risks.",
+    challenge: "Parsing complex PDF layouts with tables and multi-column text accurately.",
+    images: ["https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=2000"]
   },
   {
     id: 4,
-    title: "AI Chatbot Mobile App",
+    title: "AI Chatbot App",
     category: "Mobile Dev",
     stack: ["React Native", "LLM APIs", "AsyncStorage"],
     color: "#10b981",
-    description: "Cross-platform mobile assistant with persistent local storage.",
+    description: "Cross-platform mobile assistant.",
+    longDescription: "A personal assistant app that runs a quantized LLM locally on the device for privacy, syncing only essential metadata to the cloud.",
+    challenge: "Optimizing the model to run smoothly on older Android devices without draining battery.",
+    images: ["https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=2000"]
   },
   {
     id: 5,
-    title: "Financial Risk Model",
+    title: "Risk Model",
     category: "Data Science",
-    stack: ["Python", "Scikit-learn", "Pandas", "ML"],
+    stack: ["Python", "Scikit-learn", "Pandas"],
     color: "#ef4444",
-    description: "Predictive modeling for assessing financial portfolio risks.",
+    description: "Predictive modeling for financial risks.",
+    longDescription: "Built a regression model to predict stock volatility based on 10 years of historical market data and sentiment analysis from news APIs.",
+    challenge: "Cleaning noisy financial data and preventing overfitting on historical trends.",
+    images: ["https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&q=80&w=2000"]
   },
   {
     id: 6,
     title: "CSV AI Agent",
     category: "Analytics",
-    stack: ["Python", "Streamlit", "Groq API", "Hugging Face"],
+    stack: ["Python", "Streamlit", "Groq API"],
     color: "#8b5cf6",
-    description: "RAG-based Q&A agent for instant CSV data analysis.",
+    description: "RAG-based Q&A agent for CSVs.",
+    longDescription: "An agent that converts natural language questions into Pandas code to analyze uploaded CSV files instantly.",
+    challenge: "Ensuring the generated Python code is safe to execute and handles edge cases.",
+    images: ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000"]
   },
 ];
 
@@ -68,7 +91,7 @@ const projects = [
 const LaptopModel = ({ activeProject }) => {
   const group = useRef();
   
-  useThreeFrame((state) => {
+  useFrame((state) => {
     const t = state.clock.getElapsedTime();
     group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, Math.cos(t / 2) / 20 + 0.25, 0.1);
     group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, Math.sin(t / 4) / 10, 0.1);
@@ -108,88 +131,224 @@ const LaptopModel = ({ activeProject }) => {
   );
 };
 
-// --- KEY COMPONENT: PROJECT SHOWCASE (RESPONSIVE FIX) ---
-const ProjectShowcase = () => {
-  const [activeProject, setActiveProject] = useState(projects[0]);
+// --- UPDATED COMPONENT: PROJECT DETAIL MODAL (SCROLL FIXED) ---
+const ProjectDetailModal = ({ project, onClose }) => {
+  // 2. GET LENIS INSTANCE
+  const lenis = useLenis();
+
+  // 3. STOP/START BACKGROUND SCROLL ON OPEN/CLOSE
+  useEffect(() => {
+    if (lenis) {
+      lenis.stop(); // Stop main page scroll
+    }
+    return () => {
+      if (lenis) {
+        lenis.start(); // Restart main page scroll on close
+      }
+    };
+  }, [lenis]);
+
+  if (!project) return null;
 
   return (
-    <section id="projects" className="relative w-full bg-[#0a0a0a] text-white py-12 lg:py-32">
-      <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-        
-        {/* 1. 3D SCENE (Sticky Header) */}
-        {/* RESPONSIVE LOGIC:
-            - Mobile (< 768px): h-[45vh], Sticky Top.
-            - Tablet (768px - 1024px): h-[50vh], Sticky Top. (Added md:h-[50vh])
-            - Desktop (> 1024px): h-screen, Sticky Top, Side Layout.
-        */}
-        <div className="sticky top-0 h-[45vh] md:h-[50vh] w-full z-50 bg-[#0a0a0a] border-b border-white/5 lg:h-screen lg:border-none lg:bg-transparent lg:sticky lg:top-0 flex flex-col justify-center shadow-2xl lg:shadow-none">
-           <div className="w-full h-full relative">
-              {/* Adjusted camera position for better framing on tablets */}
-              <Canvas camera={{ position: [0, 0, 13], fov: 30 }} dpr={[1, 2]}> 
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1.5} />
-                <Environment preset="city" />
-                <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={20} blur={2} far={4.5} />
-                <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-                  <LaptopModel activeProject={activeProject} />
-                </Float>
-              </Canvas>
+    <>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/80 z-[90] lg:hidden backdrop-blur-sm"
+      />
+
+      <motion.div
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-20 bottom-10 right-10 z-[100] w-[92%] lg:w-[45%] bg-[#111] shadow-2xl overflow-hidden flex flex-col rounded-[2rem] border border-white/10" 
+      >
+        <div className="flex items-center justify-between p-6 md:p-8 bg-[#111] z-20 border-b border-white/5">
+           <div className="flex gap-2">
+              <button 
+                onClick={onClose}
+                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-bold uppercase tracking-widest transition-colors text-white/70 hover:text-white"
+              >
+                 <ChevronRight className="w-3 h-3" /> Back
+              </button>
            </div>
            
-           {/* Fade Gradient: Visible on Mobile & Tablet, Hidden on Desktop */}
-           <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent lg:hidden" />
+           <div className="flex gap-2">
+              <a href="#" className="p-2 bg-white text-black rounded-full hover:bg-neutral-200 transition-colors">
+                 <ExternalLink className="w-4 h-4" />
+              </a>
+              <button onClick={onClose} className="p-2 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors">
+                 <X className="w-4 h-4" />
+              </button>
+           </div>
         </div>
 
-        {/* 2. PROJECT LIST */}
+        {/* 4. IMPORTANT: 'data-lenis-prevent' allows internal scrolling here */}
         <div 
-          className="flex flex-col gap-24 lg:gap-32 pb-32 px-2 md:px-8 lg:px-6 z-0 relative"
-          style={{ 
-            maskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)' 
-          }}
+          className="flex-1 overflow-y-auto p-6 md:p-10 no-scrollbar"
+          data-lenis-prevent 
         >
-          
-          {/* Spacer: Larger for tablets to clear the bigger header */}
-          <div className="h-[12vh] md:h-[15vh] lg:hidden" />
+           <div className="mb-10">
+              <motion.span 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-xs font-bold uppercase tracking-[0.2em] text-blue-400 mb-4 block"
+                style={{ color: project.color }}
+              >
+                {project.category}
+              </motion.span>
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl md:text-6xl font-serif text-white mb-6 leading-tight"
+              >
+                {project.title}
+              </motion.h1>
 
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 50, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              // Sync Fix: On Mobile/Tablet, trigger when card hits center-bottom. On Desktop, center.
-              viewport={{ amount: 0.3, margin: "-20% 0px -10% 0px" }}
-              
-              transition={{ 
-                duration: 0.6, 
-                ease: "easeOut", 
-                delay: index === 0 ? 0.4 : 0 
-              }}
-              
-              onViewportEnter={() => setActiveProject(project)}
-              // Card Size: Slightly taller on tablets (md:min-h-[45vh])
-              className="min-h-[40vh] md:min-h-[45vh] lg:min-h-[50vh] flex flex-col justify-center border-l-2 border-white/10 pl-6 md:pl-10 lg:pl-12 relative group"
-            >
-              <div className="absolute -left-[2px] top-0 h-full w-[4px] bg-white/10 rounded-full overflow-hidden">
-                 <motion.div className="w-full h-full origin-top" style={{ backgroundColor: project.color }} initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} transition={{ duration: 0.5 }} />
-              </div>
-              <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: project.color }}>{project.category}</span>
-              <h3 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-4 group-hover:text-white/90 transition-colors">{project.title}</h3>
-              <p className="text-white/60 leading-relaxed text-sm md:text-lg lg:text-base max-w-md mb-6">{project.description}</p>
               <div className="flex flex-wrap gap-2 mb-8">
-                {project.stack.map((tech) => (
-                  <span key={tech} className="px-3 py-1 bg-white/5 rounded-full text-[10px] md:text-xs text-white/50 border border-white/5">{tech}</span>
+                {project.stack.map(tech => (
+                  <span key={tech} className="px-3 py-1 border border-white/10 rounded-full text-[10px] uppercase tracking-widest text-white/50">
+                    {tech}
+                  </span>
                 ))}
               </div>
-              <div className="flex items-center gap-6">
-                <button className="flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest hover:text-white/80 transition-colors"><ExternalLink className="w-4 h-4" /> Live Demo</button>
-                <button className="flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest hover:text-white/80 transition-colors"><Github className="w-4 h-4" /> Source Code</button>
+           </div>
+
+           <div className="w-full h-[1px] bg-white/10 mb-10" />
+
+           <div className="grid grid-cols-1 gap-12 mb-16">
+              <div>
+                 <h3 className="text-xl text-white font-medium mb-4">Overview</h3>
+                 <p className="text-white/60 leading-relaxed text-sm md:text-base">
+                    {project.longDescription}
+                 </p>
               </div>
-            </motion.div>
-          ))}
+              
+              <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
+                 <h3 className="text-sm font-bold uppercase tracking-widest text-white/90 mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500" /> The Challenge
+                 </h3>
+                 <p className="text-white/60 leading-relaxed text-sm">
+                    {project.challenge}
+                 </p>
+              </div>
+           </div>
+
+           <div className="flex flex-col gap-6">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-white/30">Project Gallery</h3>
+              {project.images?.map((img, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="relative w-full aspect-[16/10] bg-neutral-900 rounded-lg overflow-hidden border border-white/5 group"
+                >
+                   <Image 
+                     src={img}
+                     alt="Project detail"
+                     fill
+                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                     unoptimized
+                   />
+                </motion.div>
+              ))}
+           </div>
+
+           <div className="h-20" />
         </div>
-      </div>
-    </section>
+      </motion.div>
+    </>
+  );
+};
+
+// --- KEY COMPONENT: PROJECT SHOWCASE ---
+const ProjectShowcase = () => {
+  const [activeProject, setActiveProject] = useState(projects[0]);
+  const [selectedProject, setSelectedProject] = useState(null); 
+
+  return (
+    <>
+      <section id="projects" className="relative w-full bg-[#0a0a0a] text-white py-12 lg:py-32">
+        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          
+          <div className="sticky top-0 h-[45vh] md:h-[50vh] w-full z-50 bg-[#0a0a0a] border-b border-white/5 lg:h-screen lg:border-none lg:bg-transparent lg:sticky lg:top-0 flex flex-col justify-center shadow-2xl lg:shadow-none">
+             <div className="w-full h-full relative">
+                <Canvas camera={{ position: [0, 0, 13], fov: 30 }} dpr={[1, 2]}> 
+                  <ambientLight intensity={0.5} />
+                  <directionalLight position={[10, 10, 5]} intensity={1.5} />
+                  <Environment preset="city" />
+                  <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={20} blur={2} far={4.5} />
+                  <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
+                    <LaptopModel activeProject={activeProject} />
+                  </Float>
+                </Canvas>
+             </div>
+             
+             <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent lg:hidden" />
+          </div>
+
+          <div 
+            className="flex flex-col gap-24 lg:gap-32 pb-32 px-2 md:px-8 lg:px-6 z-0 relative"
+            style={{ 
+              maskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)' 
+            }}
+          >
+            <div className="h-[12vh] md:h-[15vh] lg:hidden" />
+
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ amount: 0.3, margin: "-20% 0px -10% 0px" }}
+                transition={{ 
+                  duration: 0.6, 
+                  ease: "easeOut", 
+                  delay: index === 0 ? 0.4 : 0 
+                }}
+                onViewportEnter={() => setActiveProject(project)}
+                onClick={() => setSelectedProject(project)}
+                className="min-h-[40vh] md:min-h-[45vh] lg:min-h-[50vh] flex flex-col justify-center border-l-2 border-white/10 pl-6 md:pl-10 lg:pl-12 relative group cursor-pointer"
+              >
+                <div className="absolute -left-[2px] top-0 h-full w-[4px] bg-white/10 rounded-full overflow-hidden">
+                   <motion.div className="w-full h-full origin-top" style={{ backgroundColor: project.color }} initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} transition={{ duration: 0.5 }} />
+                </div>
+                <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: project.color }}>{project.category}</span>
+                <h3 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-4 group-hover:text-white/90 transition-colors">{project.title}</h3>
+                <p className="text-white/60 leading-relaxed text-sm md:text-lg lg:text-base max-w-md mb-6">{project.description}</p>
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {project.stack.map((tech) => (
+                    <span key={tech} className="px-3 py-1 bg-white/5 rounded-full text-[10px] md:text-xs text-white/50 border border-white/5">{tech}</span>
+                  ))}
+                </div>
+                <div className="flex items-center gap-6">
+                  <span className="flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest hover:text-white/80 transition-colors pointer-events-none"><ExternalLink className="w-4 h-4" /> View Details</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- RENDER MODAL --- */}
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectDetailModal 
+            project={selectedProject} 
+            onClose={() => setSelectedProject(null)} 
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
@@ -202,10 +361,16 @@ const CustomCursor = () => {
     if (typeof window === "undefined" || window.matchMedia("(hover: none)").matches) return;
 
     const updateMousePosition = (e) => setMousePosition({ x: e.clientX, y: e.clientY });
-    const handleMouseOver = (e) => setIsHovering(['A', 'BUTTON', 'CANVAS'].includes(e.target.tagName));
+    
+    const handleMouseOver = (e) => {
+      const target = e.target;
+      const isClickable = target.closest('a') || target.closest('button') || target.tagName === 'CANVAS';
+      setIsHovering(!!isClickable);
+    };
     
     window.addEventListener('mousemove', updateMousePosition);
     window.addEventListener('mouseover', handleMouseOver);
+    
     return () => {
       window.removeEventListener('mousemove', updateMousePosition);
       window.removeEventListener('mouseover', handleMouseOver);
@@ -214,9 +379,18 @@ const CustomCursor = () => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-8 h-8 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference hidden md:block"
-      animate={{ x: mousePosition.x - 16, y: mousePosition.y - 16, scale: isHovering ? 2.5 : 1 }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className="fixed top-0 left-0 w-12 h-12 bg-white rounded-full pointer-events-none z-[9999] hidden md:block mix-blend-difference"
+      animate={{ 
+        x: mousePosition.x - 24,
+        y: mousePosition.y - 24,
+        scale: isHovering ? 1.5 : 1, 
+      }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 120, 
+        damping: 20,    
+        mass: 0.8       
+      }}
     />
   );
 };
@@ -239,7 +413,7 @@ const FloatingNavbar = () => {
   );
 };
 
-// --- 5. SKILLS PHYSICS (ALL DEVICES FIXED) ---
+// --- 5. SKILLS PHYSICS ---
 const SkillsPhysics = () => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -265,7 +439,6 @@ const SkillsPhysics = () => {
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
     
-    // RESPONSIVE LOGIC: Treat iPad/Tablet (up to 1024px) as "Mobile" for physics sizing
     const isMobile = width < 1024; 
 
     const render = Render.create({
@@ -295,9 +468,6 @@ const SkillsPhysics = () => {
     let worldWalls = addWalls(width, height);
 
     const skillBodies = skills.map((skill, i) => {
-      // SIZING: 
-      // Mobile/Tablet: 40px-50px (Touch friendly)
-      // Desktop: 48px-60px
       const radius = (isMobile ? 40 : 48) + Math.random() * (isMobile ? 10 : 12);
       const spawnX = Math.random() * (width - 100) + 50; 
       const spawnY = Math.random() * (height * 0.3) + 50; 
@@ -403,11 +573,6 @@ const SkillsPhysics = () => {
        <div className="mb-6 text-[10px] uppercase tracking-[0.25em] text-white/40 font-semibold animate-pulse">
          Hover • Drag • Throw
        </div>
-      {/* CONTAINER SIZING:
-          - Mobile: 90% Width, 60vh Height
-          - Tablet (md): 85% Width, 60vh Height
-          - Desktop (lg): 70% Width, 450px Height
-      */}
       <div 
         ref={containerRef} 
         onMouseDown={() => { isMouseDownRef.current = true; }}
@@ -444,9 +609,9 @@ const TornEdge = () => (
 
 function InfiniteMarquee() {
   return (
-    <div className="absolute top-[20%] left-0 w-full overflow-hidden whitespace-nowrap z-0 pointer-events-none opacity-[0.06] select-none">
-      <motion.div className="inline-block" animate={{ x: [0, -1200] }} transition={{ repeat: Infinity, ease: "linear", duration: 35 }}>
-        <span className="text-[20vw] font-black uppercase leading-none tracking-[-0.05em] text-white">OM KUMAR — AI ENGINEER — OM KUMAR — AI ENGINEER — OM KUMAR — AI ENGINEER —</span>
+    <div className="absolute top-[60%] left-0 w-full overflow-hidden whitespace-nowrap z-0 pointer-events-none opacity-[0.7] select-none">
+      <motion.div className="inline-block" animate={{ x: [0, -1200] }} transition={{ repeat: Infinity, ease: "linear", duration: 10 }}>
+        <span className="text-[20vw] font-black uppercase leading-none tracking-[-0.05em] text-white">OM GUPTA — AI & FULL STACK ENGINEER — OM GUPTA — AI & FULL STACK ENGINEER — OM GUPTA — AI & FULL STACK ENGINEER —</span>
       </motion.div>
     </div>
   );
@@ -469,13 +634,18 @@ function RotatingButton() {
 // --- 7. MAIN PAGE LAYOUT ---
 export default function Home() {
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start end", "end start"] });
-  const imageY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
   const textReveal = { hidden: { y: 120, opacity: 0 }, visible: (i) => ({ y: 0, opacity: 1, transition: { delay: 0.2 + i * 0.1, duration: 1.2, ease: [0.22, 1, 0.36, 1] } }) };
 
+  const lenisOptions = {
+    lerp: 0.05, 
+    duration: 1.5,
+    smoothTouch: true,
+    smoothWheel: true,
+  };
+
   return (
-    <ReactLenis root>
-      <div className="relative bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black cursor-none">
+    <ReactLenis root options={lenisOptions}>
+      <div className="relative bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black">
         <CustomCursor />
         <FloatingNavbar />
         <NoiseOverlay />
@@ -501,14 +671,21 @@ export default function Home() {
           <InfiniteMarquee />
           <div className="w-full px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-20">
             <div className="col-span-1 md:col-span-3">
-              <p className="text-sm font-light leading-loose tracking-wide border-l border-white/20 pl-6 opacity-90">Hello, I'm Om. A senior Engineering student specializing in <strong className="text-white">Intelligent Systems</strong> and <strong className="text-white">Full Stack Architecture.</strong></p>
+              <p className="text-sm font-light leading-loose tracking-wide border-l border-white/20 pl-6 opacity-90">Hello, I'm Om. A Computer Science Engineering student specializing in <strong className="text-white">Intelligent Systems</strong> and <strong className="text-white">Full Stack Architecture.</strong></p>
             </div>
             <div className="col-span-1 md:col-span-6 flex justify-center">
-              <motion.div style={{ y: imageY }} className="w-full max-w-[400px] aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6"><span className="text-[10px] font-mono bg-black/50 px-2 py-1 backdrop-blur-md text-white/70">IMG_PROFILE.RAW</span></div>
-              </motion.div>
+              {/* IMAGE CONTAINER with smaller max-width (300px) */}
+              <div className="w-full max-w-[350px] aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative shadow-2xl">
+                <Image
+                  src="https://res.cloudinary.com/dzxxtkn16/image/upload/v1768650926/profile-portfolio_iguynx.png"
+                  alt="Om Gupta"
+                  fill
+                  className="object-cover"
+                  priority
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
+              </div>
             </div>
             <div className="col-span-1 md:col-span-3 flex justify-end"><RotatingButton /></div>
           </div>
