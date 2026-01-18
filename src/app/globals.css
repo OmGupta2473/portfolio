@@ -25,3 +25,15 @@ body {
   background-image: theme('backgroundImage.noise');
   opacity: 0.07;
 }
+/* --- HIDE SCROLLBAR GLOBALLY --- */
+
+/* For Chrome, Safari, and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* For IE, Edge, and Firefox */
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

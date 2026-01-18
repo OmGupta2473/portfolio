@@ -1,26 +1,31 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
+import { useRef, useState, useEffect, memo } from "react"; // ADDED 'memo' for optimization
+import { motion, useScroll, useTransform, useInView, AnimatePresence, useMotionValue, useSpring, useVelocity } from "framer-motion";
 import { ArrowDown, ArrowUpRight, ExternalLink, Github, X, ChevronRight } from "lucide-react";
 import { ReactLenis, useLenis } from "lenis/react";
-import { useFrame as useHamoFrame } from "hamo";
-import Tempus from "tempus";
 import Matter from "matter-js";
-import { Canvas, useFrame as useThreeFrame } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, ContactShadows, Float, Html } from "@react-three/drei";
 import * as THREE from "three";
 import Image from "next/image";
+import Link from "next/link";
 
 // --- 1. DATA: PROJECTS ---
 const projects = [
   {
     id: 1,
-    title: "Enterprise AI Agent System",
+    title: "Enterprise AI Agent",
     category: "AI Architecture",
-    stack: ["Python", "LangChain", "ChromaDB", "Docker", "RAG"],
+    stack: ["Python", "LangChain", "ChromaDB", "Docker"],
     color: "#3b82f6",
     description: "A scalable RAG system for enterprise data retrieval.",
+    longDescription: "Designed a centralized knowledge retrieval system for a large-scale enterprise. The system ingests thousands of PDFs, Docs, and internal wiki pages into a vector database.",
+    challenge: "The primary challenge was handling latency with large-scale vector retrieval while maintaining context accuracy across 100+ document pages.",
+    images: [
+      "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=2000",
+      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=2000"
+    ]
   },
   {
     id: 2,
@@ -28,47 +33,66 @@ const projects = [
     category: "E-Commerce",
     stack: ["React", "Firebase", "Firestore", "Vercel"],
     color: "#ec4899",
-    description: "Full-stack booking & e-commerce platform for a beauty brand.",
+    description: "Full-stack booking & e-commerce platform.",
+    longDescription: "A bespoke e-commerce solution tailored for a boutique nail salon. Features include real-time appointment scheduling, inventory management, and a custom CMS.",
+    challenge: "Synchronizing physical store availability with online bookings in real-time to prevent double-booking slots.",
+    images: [
+      "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=2000",
+      "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=2000"
+    ]
   },
   {
     id: 3,
-    title: "AI PDF Query System",
+    title: "AI PDF Query Tool",
     category: "SaaS Tool",
-    stack: ["Python", "LangChain", "Streamlit", "Vector Search"],
+    stack: ["Python", "LangChain", "Streamlit"],
     color: "#f97316",
-    description: "Intelligent document analysis tool using vector embeddings.",
+    description: "Intelligent document analysis tool.",
+    longDescription: "A SaaS tool allowing users to upload legal contracts and ask complex questions. The AI highlights specific clauses and checks for compliance risks.",
+    challenge: "Parsing complex PDF layouts with tables and multi-column text accurately.",
+    images: ["https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=2000"]
   },
   {
     id: 4,
-    title: "AI Chatbot Mobile App",
+    title: "AI Chatbot App",
     category: "Mobile Dev",
     stack: ["React Native", "LLM APIs", "AsyncStorage"],
     color: "#10b981",
-    description: "Cross-platform mobile assistant with persistent local storage.",
+    description: "Cross-platform mobile assistant.",
+    longDescription: "A personal assistant app that runs a quantized LLM locally on the device for privacy, syncing only essential metadata to the cloud.",
+    challenge: "Optimizing the model to run smoothly on older Android devices without draining battery.",
+    images: ["https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=2000"]
   },
   {
     id: 5,
-    title: "Financial Risk Model",
+    title: "Risk Model",
     category: "Data Science",
-    stack: ["Python", "Scikit-learn", "Pandas", "ML"],
+    stack: ["Python", "Scikit-learn", "Pandas"],
     color: "#ef4444",
-    description: "Predictive modeling for assessing financial portfolio risks.",
+    description: "Predictive modeling for financial risks.",
+    longDescription: "Built a regression model to predict stock volatility based on 10 years of historical market data and sentiment analysis from news APIs.",
+    challenge: "Cleaning noisy financial data and preventing overfitting on historical trends.",
+    images: ["https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&q=80&w=2000"]
   },
   {
     id: 6,
     title: "CSV AI Agent",
     category: "Analytics",
-    stack: ["Python", "Streamlit", "Groq API", "Hugging Face"],
+    stack: ["Python", "Streamlit", "Groq API"],
     color: "#8b5cf6",
-    description: "RAG-based Q&A agent for instant CSV data analysis.",
+    description: "RAG-based Q&A agent for CSVs.",
+    longDescription: "An agent that converts natural language questions into Pandas code to analyze uploaded CSV files instantly.",
+    challenge: "Ensuring the generated Python code is safe to execute and handles edge cases.",
+    images: ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000"]
   },
 ];
 
 // --- 2. 3D COMPONENTS (Laptop) ---
-const LaptopModel = ({ activeProject }) => {
+// OPTIMIZATION 1: Wrapped in memo to prevent re-rendering the 3D mesh when parents update
+const LaptopModel = memo(({ activeProject }) => {
   const group = useRef();
   
-  useThreeFrame((state) => {
+  useFrame((state) => {
     const t = state.clock.getElapsedTime();
     group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, Math.cos(t / 2) / 20 + 0.25, 0.1);
     group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, Math.sin(t / 4) / 10, 0.1);
@@ -106,131 +130,379 @@ const LaptopModel = ({ activeProject }) => {
       </group>
     </group>
   );
-};
+}, (prevProps, nextProps) => prevProps.activeProject.id === nextProps.activeProject.id);
 
-// --- KEY COMPONENT: PROJECT SHOWCASE (RESPONSIVE FIX) ---
-const ProjectShowcase = () => {
-  const [activeProject, setActiveProject] = useState(projects[0]);
+// --- UPDATED COMPONENT: PROJECT DETAIL MODAL (SCROLL FIXED) ---
+const ProjectDetailModal = ({ project, onClose }) => {
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (lenis) {
+      lenis.stop();
+    }
+    return () => {
+      if (lenis) {
+        lenis.start();
+      }
+    };
+  }, [lenis]);
+
+  if (!project) return null;
 
   return (
-    <section id="projects" className="relative w-full bg-[#0a0a0a] text-white py-12 lg:py-32">
-      <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-        
-        {/* 1. 3D SCENE (Sticky Header) */}
-        {/* RESPONSIVE LOGIC:
-            - Mobile (< 768px): h-[45vh], Sticky Top.
-            - Tablet (768px - 1024px): h-[50vh], Sticky Top. (Added md:h-[50vh])
-            - Desktop (> 1024px): h-screen, Sticky Top, Side Layout.
-        */}
-        <div className="sticky top-0 h-[45vh] md:h-[50vh] w-full z-50 bg-[#0a0a0a] border-b border-white/5 lg:h-screen lg:border-none lg:bg-transparent lg:sticky lg:top-0 flex flex-col justify-center shadow-2xl lg:shadow-none">
-           <div className="w-full h-full relative">
-              {/* Adjusted camera position for better framing on tablets */}
-              <Canvas camera={{ position: [0, 0, 13], fov: 30 }} dpr={[1, 2]}> 
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1.5} />
-                <Environment preset="city" />
-                <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={20} blur={2} far={4.5} />
-                <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-                  <LaptopModel activeProject={activeProject} />
-                </Float>
-              </Canvas>
+    <>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/80 z-[90] lg:hidden backdrop-blur-sm"
+      />
+
+      <motion.div
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-20 bottom-10 right-10 z-[100] w-[92%] lg:w-[45%] bg-[#111] shadow-2xl overflow-hidden flex flex-col rounded-[2rem] border border-white/10" 
+      >
+        <div className="flex items-center justify-between p-6 md:p-8 bg-[#111] z-20 border-b border-white/5">
+           <div className="flex gap-2">
+              <button 
+                onClick={onClose}
+                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-bold uppercase tracking-widest transition-colors text-white/70 hover:text-white"
+              >
+                 <ChevronRight className="w-3 h-3" /> Back
+              </button>
            </div>
            
-           {/* Fade Gradient: Visible on Mobile & Tablet, Hidden on Desktop */}
-           <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent lg:hidden" />
+           <div className="flex gap-2">
+              <a href="#" className="p-2 bg-white text-black rounded-full hover:bg-neutral-200 transition-colors">
+                 <ExternalLink className="w-4 h-4" />
+              </a>
+              <button onClick={onClose} className="p-2 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors">
+                 <X className="w-4 h-4" />
+              </button>
+           </div>
         </div>
 
-        {/* 2. PROJECT LIST */}
         <div 
-          className="flex flex-col gap-24 lg:gap-32 pb-32 px-2 md:px-8 lg:px-6 z-0 relative"
-          style={{ 
-            maskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)' 
-          }}
+          className="flex-1 overflow-y-auto p-6 md:p-10 no-scrollbar"
+          data-lenis-prevent 
         >
-          
-          {/* Spacer: Larger for tablets to clear the bigger header */}
-          <div className="h-[12vh] md:h-[15vh] lg:hidden" />
+           <div className="mb-10">
+              <motion.span 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-xs font-bold uppercase tracking-[0.2em] text-blue-400 mb-4 block"
+                style={{ color: project.color }}
+              >
+                {project.category}
+              </motion.span>
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl md:text-6xl font-serif text-white mb-6 leading-tight"
+              >
+                {project.title}
+              </motion.h1>
 
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 50, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              // Sync Fix: On Mobile/Tablet, trigger when card hits center-bottom. On Desktop, center.
-              viewport={{ amount: 0.3, margin: "-20% 0px -10% 0px" }}
-              
-              transition={{ 
-                duration: 0.6, 
-                ease: "easeOut", 
-                delay: index === 0 ? 0.4 : 0 
-              }}
-              
-              onViewportEnter={() => setActiveProject(project)}
-              // Card Size: Slightly taller on tablets (md:min-h-[45vh])
-              className="min-h-[40vh] md:min-h-[45vh] lg:min-h-[50vh] flex flex-col justify-center border-l-2 border-white/10 pl-6 md:pl-10 lg:pl-12 relative group"
-            >
-              <div className="absolute -left-[2px] top-0 h-full w-[4px] bg-white/10 rounded-full overflow-hidden">
-                 <motion.div className="w-full h-full origin-top" style={{ backgroundColor: project.color }} initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} transition={{ duration: 0.5 }} />
-              </div>
-              <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: project.color }}>{project.category}</span>
-              <h3 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-4 group-hover:text-white/90 transition-colors">{project.title}</h3>
-              <p className="text-white/60 leading-relaxed text-sm md:text-lg lg:text-base max-w-md mb-6">{project.description}</p>
               <div className="flex flex-wrap gap-2 mb-8">
-                {project.stack.map((tech) => (
-                  <span key={tech} className="px-3 py-1 bg-white/5 rounded-full text-[10px] md:text-xs text-white/50 border border-white/5">{tech}</span>
+                {project.stack.map(tech => (
+                  <span key={tech} className="px-3 py-1 border border-white/10 rounded-full text-[10px] uppercase tracking-widest text-white/50">
+                    {tech}
+                  </span>
                 ))}
               </div>
-              <div className="flex items-center gap-6">
-                <button className="flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest hover:text-white/80 transition-colors"><ExternalLink className="w-4 h-4" /> Live Demo</button>
-                <button className="flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest hover:text-white/80 transition-colors"><Github className="w-4 h-4" /> Source Code</button>
+           </div>
+
+           <div className="w-full h-[1px] bg-white/10 mb-10" />
+
+           <div className="grid grid-cols-1 gap-12 mb-16">
+              <div>
+                 <h3 className="text-xl text-white font-medium mb-4">Overview</h3>
+                 <p className="text-white/60 leading-relaxed text-sm md:text-base">
+                    {project.longDescription}
+                 </p>
               </div>
-            </motion.div>
-          ))}
+              
+              <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
+                 <h3 className="text-sm font-bold uppercase tracking-widest text-white/90 mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500" /> The Challenge
+                 </h3>
+                 <p className="text-white/60 leading-relaxed text-sm">
+                    {project.challenge}
+                 </p>
+              </div>
+           </div>
+
+           <div className="flex flex-col gap-6">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-white/30">Project Gallery</h3>
+              {project.images?.map((img, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="relative w-full aspect-[16/10] bg-neutral-900 rounded-lg overflow-hidden border border-white/5 group"
+                >
+                   <Image 
+                     src={img}
+                     alt="Project detail"
+                     fill
+                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                     unoptimized
+                   />
+                </motion.div>
+              ))}
+           </div>
+
+           <div className="h-20" />
         </div>
-      </div>
-    </section>
+      </motion.div>
+    </>
   );
 };
 
-// --- 3. CUSTOM CURSOR ---
+// --- KEY COMPONENT: PROJECT SHOWCASE ---
+const ProjectShowcase = () => {
+  const [activeProject, setActiveProject] = useState(projects[0]);
+  const [selectedProject, setSelectedProject] = useState(null); 
+
+  return (
+    <>
+      <section id="projects" className="relative w-full bg-[#0a0a0a] text-white py-12 lg:py-32">
+        <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          
+          <div className="sticky top-0 h-[45vh] md:h-[50vh] w-full z-50 bg-[#0a0a0a] border-b border-white/5 lg:h-screen lg:border-none lg:bg-transparent lg:sticky lg:top-0 flex flex-col justify-center shadow-2xl lg:shadow-none">
+             <div className="w-full h-full relative">
+                {/* OPTIMIZATION 2: Reduced DPR from [1,2] to [1, 1.5] and added preserveDrawingBuffer */}
+                <Canvas 
+                    camera={{ position: [0, 0, 13], fov: 30 }} 
+                    dpr={[1, 1.5]}
+                    gl={{ preserveDrawingBuffer: true, powerPreference: "high-performance" }}
+                > 
+                  <ambientLight intensity={0.5} />
+                  <directionalLight position={[10, 10, 5]} intensity={1.5} />
+                  <Environment preset="city" />
+                  
+                  {/* OPTIMIZATION 3: 'frames={1}' bakes shadows once, saving massive GPU power */}
+                  <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={20} blur={2} far={4.5} frames={1} />
+                  
+                  <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
+                    <LaptopModel activeProject={activeProject} />
+                  </Float>
+                </Canvas>
+             </div>
+             
+             <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent lg:hidden" />
+          </div>
+
+          <div 
+            className="flex flex-col gap-24 lg:gap-32 pb-32 px-2 md:px-8 lg:px-6 z-0 relative"
+            style={{ 
+              maskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, black 100px, black 100%)' 
+            }}
+          >
+            <div className="h-[12vh] md:h-[15vh] lg:hidden" />
+
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ amount: 0.3, margin: "-20% 0px -10% 0px" }}
+                transition={{ 
+                  duration: 0.6, 
+                  ease: "easeOut", 
+                  delay: index === 0 ? 0.4 : 0 
+                }}
+                onViewportEnter={() => setActiveProject(project)}
+                onClick={() => setSelectedProject(project)}
+                className="min-h-[40vh] md:min-h-[45vh] lg:min-h-[50vh] flex flex-col justify-center border-l-2 border-white/10 pl-6 md:pl-10 lg:pl-12 relative group cursor-pointer"
+              >
+                <div className="absolute -left-[2px] top-0 h-full w-[4px] bg-white/10 rounded-full overflow-hidden">
+                   <motion.div className="w-full h-full origin-top" style={{ backgroundColor: project.color }} initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} transition={{ duration: 0.5 }} />
+                </div>
+                <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: project.color }}>{project.category}</span>
+                <h3 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-4 group-hover:text-white/90 transition-colors">{project.title}</h3>
+                <p className="text-white/60 leading-relaxed text-sm md:text-lg lg:text-base max-w-md mb-6">{project.description}</p>
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {project.stack.map((tech) => (
+                    <span key={tech} className="px-3 py-1 bg-white/5 rounded-full text-[10px] md:text-xs text-white/50 border border-white/5">{tech}</span>
+                  ))}
+                </div>
+                <div className="flex items-center gap-6">
+                  <span className="flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest hover:text-white/80 transition-colors pointer-events-none"><ExternalLink className="w-4 h-4" /> View Details</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- RENDER MODAL --- */}
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectDetailModal 
+            project={selectedProject} 
+            onClose={() => setSelectedProject(null)} 
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+// --- 3. CUSTOM CURSOR (OPTIMIZED) ---
 const CustomCursor = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  
+  // 1. Motion Values (Instant updates, no lag)
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // 2. Physics Configuration (High stiffness = Snappy)
+  const springConfig = { damping: 20, stiffness: 400, mass: 0.5 };
+  const smoothX = useSpring(mouseX, springConfig);
+  const smoothY = useSpring(mouseY, springConfig);
+
+  // 3. Jelly/Elastic Effect logic
+  const velocityX = useVelocity(smoothX);
+  const velocityY = useVelocity(smoothY);
+  
+  // Stretch based on speed: Fast movement = stretch 20%
+  const scaleX = useTransform(velocityX, [-800, 0, 800], [1.2, 1, 1.2]);
+  const scaleY = useTransform(velocityY, [-800, 0, 800], [0.8, 1, 0.8]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || window.matchMedia("(hover: none)").matches) return;
+    // Standard mouse listeners
+    const updateMouse = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
 
-    const updateMousePosition = (e) => setMousePosition({ x: e.clientX, y: e.clientY });
-    const handleMouseOver = (e) => setIsHovering(['A', 'BUTTON', 'CANVAS'].includes(e.target.tagName));
-    
-    window.addEventListener('mousemove', updateMousePosition);
+    const handleMouseOver = (e) => {
+      const target = e.target;
+      // Check if hovering clickable elements
+      const isClickable = target.closest('a') || target.closest('button') || target.tagName === 'CANVAS';
+      setIsHovering(!!isClickable);
+    };
+
+    window.addEventListener('mousemove', updateMouse);
     window.addEventListener('mouseover', handleMouseOver);
+    
     return () => {
-      window.removeEventListener('mousemove', updateMousePosition);
+      window.removeEventListener('mousemove', updateMouse);
       window.removeEventListener('mouseover', handleMouseOver);
     };
-  }, []);
+  }, [mouseX, mouseY]);
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-8 h-8 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference hidden md:block"
-      animate={{ x: mousePosition.x - 16, y: mousePosition.y - 16, scale: isHovering ? 2.5 : 1 }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className="fixed top-0 left-0 w-3 h-3 md:w-10 md:h-10 bg-white rounded-full pointer-events-none z-[9999] hidden md:block mix-blend-difference"
+      style={{
+        x: smoothX,
+        y: smoothY,
+        scaleX: scaleX, // Dynamic squash
+        scaleY: scaleY, // Dynamic squash
+        translateX: "-50%", // Keeps cursor centered on mouse
+        translateY: "-50%"
+      }}
+      animate={{ 
+        scale: isHovering ? 2.5 : 1, // Hover effect
+      }}
+      transition={{ 
+        scale: { type: "spring", stiffness: 300, damping: 20 } 
+      }}
     />
   );
 };
-
-// --- 4. FLOATING NAVBAR ---
+// --- 4. FLOATING NAVBAR (UPDATED WITH ROBUST SCROLL TRACKING) ---
 const FloatingNavbar = () => {
-  const [activeTab, setActiveTab] = useState("Projects");
-  const tabs = [{ name: "Projects", href: "#projects" }, { name: "About", href: "#about" }, { name: "Skills", href: "#skills" }];
+  const [activeTab, setActiveTab] = useState("About");
+
+  const tabs = [
+    { name: "About", href: "#about" },
+    { name: "Skills", href: "#skills" }, 
+    { name: "Projects", href: "#projects" }
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // 1. Get the current scroll position + half screen height (The "Center Line")
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+      // 2. Loop through sections to find which one is under the center line
+      for (const tab of tabs) {
+        const sectionId = tab.href.substring(1); // Remove '#'
+        const element = document.getElementById(sectionId);
+
+        if (element) {
+          const top = element.offsetTop;
+          const height = element.offsetHeight;
+
+          // Check if the center line is inside this section
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveTab(tab.name);
+          }
+        }
+      }
+      
+      // 3. Edge Case: If we are deep in the footer (past projects), keep "Projects" active
+      // or if we are at the very top (Hero), you might want to clear it or set "About"
+      // This simple check keeps 'Projects' active even when the footer is revealing
+      const projectsSection = document.getElementById("projects");
+      if (projectsSection) {
+         if (window.scrollY > projectsSection.offsetTop + projectsSection.offsetHeight) {
+             setActiveTab("Projects");
+         }
+      }
+    };
+
+    // Add listener
+    window.addEventListener("scroll", handleScroll);
+    // Trigger once on mount to set initial state
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] md:w-auto max-w-[400px]">
       <div className="flex items-center justify-between p-1.5 bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
         {tabs.map((tab) => (
-          <a key={tab.name} href={tab.href} onClick={() => setActiveTab(tab.name)} className="relative px-4 md:px-6 py-2.5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-white/60 hover:text-white transition-colors duration-300 flex-1 text-center">
-            {activeTab === tab.name && <motion.div layoutId="active-pill" className="absolute inset-0 bg-white/10 rounded-full" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />}
+          <a
+            key={tab.name}
+            href={tab.href}
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab(tab.name);
+              const element = document.getElementById(tab.href.substring(1));
+              if (element) {
+                 // Use Lenis scroll for smooth jump
+                 // Note: We need to access lenis instance if possible, or fallback to native
+                 window.scrollTo({
+                   top: element.offsetTop,
+                   behavior: "smooth"
+                 });
+              }
+            }}
+            className={`relative px-4 md:px-6 py-2.5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-widest transition-colors duration-300 flex-1 text-center ${
+              activeTab === tab.name ? "text-white" : "text-white/60 hover:text-white"
+            }`}
+          >
+            {activeTab === tab.name && (
+              <motion.div
+                layoutId="active-pill"
+                className="absolute inset-0 bg-white/10 rounded-full"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
             <span className="relative z-10">{tab.name}</span>
           </a>
         ))}
@@ -238,8 +510,7 @@ const FloatingNavbar = () => {
     </div>
   );
 };
-
-// --- 5. SKILLS PHYSICS (ALL DEVICES FIXED) ---
+// --- 5. SKILLS PHYSICS ---
 const SkillsPhysics = () => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -265,9 +536,9 @@ const SkillsPhysics = () => {
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
     
-    // RESPONSIVE LOGIC: Treat iPad/Tablet (up to 1024px) as "Mobile" for physics sizing
     const isMobile = width < 1024; 
 
+    // OPTIMIZATION 4: Fixed pixel ratio to 1. This prevents lag on Retina screens.
     const render = Render.create({
       element: containerRef.current,
       canvas: canvasRef.current,
@@ -277,7 +548,7 @@ const SkillsPhysics = () => {
         height: height,
         background: "transparent",
         wireframes: false,
-        pixelRatio: window.devicePixelRatio,
+        pixelRatio: 1, // FORCE 1 for performance
       },
     });
 
@@ -295,9 +566,6 @@ const SkillsPhysics = () => {
     let worldWalls = addWalls(width, height);
 
     const skillBodies = skills.map((skill, i) => {
-      // SIZING: 
-      // Mobile/Tablet: 40px-50px (Touch friendly)
-      // Desktop: 48px-60px
       const radius = (isMobile ? 40 : 48) + Math.random() * (isMobile ? 10 : 12);
       const spawnX = Math.random() * (width - 100) + 50; 
       const spawnY = Math.random() * (height * 0.3) + 50; 
@@ -319,7 +587,9 @@ const SkillsPhysics = () => {
     World.add(engine.world, [...worldWalls, ...skillBodies]);
 
     const mouse = Mouse.create(render.canvas);
-    mouse.pixelRatio = window.devicePixelRatio; 
+    // mouse.pixelRatio = window.devicePixelRatio; // DISABLED FOR PERFORMANCE
+    mouse.pixelRatio = 1; // MATCH RENDER PIXEL RATIO
+    
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse: mouse,
       constraint: { stiffness: 0.2, render: { visible: false } }
@@ -403,11 +673,6 @@ const SkillsPhysics = () => {
        <div className="mb-6 text-[10px] uppercase tracking-[0.25em] text-white/40 font-semibold animate-pulse">
          Hover • Drag • Throw
        </div>
-      {/* CONTAINER SIZING:
-          - Mobile: 90% Width, 60vh Height
-          - Tablet (md): 85% Width, 60vh Height
-          - Desktop (lg): 70% Width, 450px Height
-      */}
       <div 
         ref={containerRef} 
         onMouseDown={() => { isMouseDownRef.current = true; }}
@@ -441,12 +706,30 @@ const TornEdge = () => (
     </svg>
   </div>
 );
-
 function InfiniteMarquee() {
   return (
-    <div className="absolute top-[20%] left-0 w-full overflow-hidden whitespace-nowrap z-0 pointer-events-none opacity-[0.06] select-none">
-      <motion.div className="inline-block" animate={{ x: [0, -1200] }} transition={{ repeat: Infinity, ease: "linear", duration: 35 }}>
-        <span className="text-[20vw] font-black uppercase leading-none tracking-[-0.05em] text-white">OM KUMAR — AI ENGINEER — OM KUMAR — AI ENGINEER — OM KUMAR — AI ENGINEER —</span>
+    <div className="absolute top-[60%] left-0 w-full overflow-hidden z-0 pointer-events-none opacity-[0.7] select-none">
+      <motion.div 
+        className="flex whitespace-nowrap"
+        // 1. FORCE WIDTH TO FIT TEXT: This ensures the text doesn't get cut off
+        style={{ width: "max-content" }} 
+        // 2. MOVE HALF WAY: Since we have 2 copies, moving 50% creates a perfect loop
+        animate={{ x: "-50%" }} 
+        transition={{ 
+          repeat: Infinity, 
+          ease: "linear", 
+          duration: 15 // Adjust speed here (10 = Fast, 20 = Slow)
+        }}
+      >
+        {/* COPY 1 */}
+        <span className="text-[20vw] font-black uppercase leading-none tracking-[-0.05em] text-white pr-12">
+          OM GUPTA — AI & FULL STACK ENGINEER — 
+        </span>
+        
+        {/* COPY 2 (Must be identical for seamless loop) */}
+        <span className="text-[20vw] font-black uppercase leading-none tracking-[-0.05em] text-white pr-12">
+          OM GUPTA — AI & FULL STACK ENGINEER — 
+        </span>
       </motion.div>
     </div>
   );
@@ -454,61 +737,171 @@ function InfiniteMarquee() {
 
 function RotatingButton() {
   return (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative w-32 h-32 md:w-40 md:h-40 flex items-center justify-center cursor-pointer group">
-      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 12, ease: "linear" }} className="absolute inset-0 w-full h-full rounded-full border border-white/20">
-        <svg viewBox="0 0 100 100" className="w-full h-full p-2">
-          <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
-          <text className="text-[9px] font-bold uppercase fill-white tracking-[0.25em]"><textPath href="#circlePath" startOffset="0%">LEARN MORE — LEARN MORE —</textPath></text>
-        </svg>
+    <Link href="/about">
+      <motion.div 
+        whileHover={{ scale: 1.05 }} 
+        whileTap={{ scale: 0.95 }} 
+        className="relative w-32 h-32 md:w-40 md:h-40 flex items-center justify-center cursor-pointer group"
+      >
+        <motion.div 
+          animate={{ rotate: 360 }} 
+          transition={{ repeat: Infinity, duration: 12, ease: "linear" }} 
+          className="absolute inset-0 w-full h-full rounded-full border border-white/20"
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full p-2">
+            <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
+            <text className="text-[9px] font-bold uppercase fill-white tracking-[0.25em]">
+              <textPath href="#circlePath" startOffset="0%">LEARN MORE — LEARN MORE —</textPath>
+            </text>
+          </svg>
+        </motion.div>
+        <div className="bg-white text-[#0a0a0a] rounded-full p-4 group-hover:bg-neutral-200 transition-colors duration-300">
+          <ArrowUpRight className="w-8 h-8" />
+        </div>
       </motion.div>
-      <div className="bg-white text-[#0a0a0a] rounded-full p-4 group-hover:bg-neutral-200 transition-colors duration-300"><ArrowUpRight className="w-8 h-8" /></div>
-    </motion.div>
+    </Link>
   );
 }
+// --- 8. CONTACT SECTION ---
+const ContactSection = () => {
+  return (
+    <section className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden z-20">
+      
+      {/* Background Gradient Spotlights */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent opacity-40 pointer-events-none" />
+
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col items-center gap-6 text-center">
+        <motion.span 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-white/40"
+        >
+          Got a project in mind?
+        </motion.span>
+        
+        <div className="overflow-hidden">
+          <motion.h2 
+            initial={{ y: "100%" }}
+            whileInView={{ y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[12vw] leading-[0.85] font-black uppercase text-white tracking-tighter"
+          >
+            Let's Connect
+          </motion.h2>
+        </div>
+
+        {/* Circular Interactive Button */}
+        <motion.a 
+          href="mailto:omgupta@example.com" // Replace with your email
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative mt-12 w-32 h-32 md:w-40 md:h-40 rounded-full bg-white flex items-center justify-center cursor-pointer group overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-neutral-200 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full origin-center ease-out" />
+          
+          <div className="relative z-10 flex flex-col items-center gap-1 transition-transform duration-300 group-hover:-translate-y-[150%]">
+             <span className="text-[10px] font-bold uppercase tracking-widest text-black">Write a</span>
+             <span className="text-[10px] font-bold uppercase tracking-widest text-black">Message</span>
+          </div>
+          
+          <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[150%] group-hover:translate-y-0 transition-transform duration-300">
+             <ArrowUpRight className="w-8 h-8 text-black" />
+          </div>
+        </motion.a>
+      </div>
+
+      {/* Footer Bottom Bar */}
+      <div className="absolute bottom-8 w-full px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-white/30">
+         <span className="hidden md:block">Connect with me on social</span>
+         <div className="flex gap-8">
+            <a href="#" className="hover:text-white transition-colors duration-300">Instagram</a>
+            <a href="#" className="hover:text-white transition-colors duration-300">Twitter</a>
+            <a href="#" className="hover:text-white transition-colors duration-300">LinkedIn</a>
+         </div>
+         <span className="md:hidden">© 2026 Om Gupta</span>
+      </div>
+    </section>
+  );
+};
 
 // --- 7. MAIN PAGE LAYOUT ---
 export default function Home() {
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start end", "end start"] });
-  const imageY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
   const textReveal = { hidden: { y: 120, opacity: 0 }, visible: (i) => ({ y: 0, opacity: 1, transition: { delay: 0.2 + i * 0.1, duration: 1.2, ease: [0.22, 1, 0.36, 1] } }) };
 
+  // OPTIMIZATION 5: Increased lerp to 0.1 for snappier, less 'heavy' feel
+  const lenisOptions = {
+    lerp: 0.1, 
+    duration: 1.5,
+    smoothTouch: false, // Disabled on touch for native feel
+    smoothWheel: true,
+  };
+
   return (
-    <ReactLenis root>
-      <div className="relative bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black cursor-none">
+    <ReactLenis root options={lenisOptions}>
+      <div className="relative bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black">
         <CustomCursor />
         <FloatingNavbar />
         <NoiseOverlay />
 
-        {/* 1. HERO SECTION */}
-        <section className="min-h-screen relative flex flex-col justify-center px-6 md:px-12 pt-24 z-10">
+        {/* HERO SECTION */}
+        <section className="min-h-screen relative flex flex-col justify-center px-6 md:px-12 pt-24 z-10 border-b border-white/5">
           <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-y-4">
             <div className="col-span-12 md:col-span-8 flex flex-col items-start leading-[0.85]">
-              <div className="overflow-hidden"><motion.h1 custom={0} initial="hidden" animate="visible" variants={textReveal} className="text-[12vw] md:text-[13vw] font-black tracking-[-0.04em] uppercase">MULTI-</motion.h1></div>
-              <div className="overflow-hidden"><motion.h1 custom={1} initial="hidden" animate="visible" variants={textReveal} className="text-[12vw] md:text-[13vw] font-black tracking-[-0.04em] uppercase">DISCIPLINARY</motion.h1></div>
-              <div className="overflow-hidden"><motion.h1 custom={2} initial="hidden" animate="visible" variants={textReveal} className="text-[12vw] md:text-[13vw] font-black tracking-[-0.04em] uppercase">ENGINEER</motion.h1></div>
+
+              {/* UPDATED: Changed text size from [12vw] to [9vw] */}
+              <div className="overflow-hidden">
+                <motion.h1 custom={0} initial="hidden" animate="visible" variants={textReveal} className="text-[12vw] md:text-[10vw] font-black tracking-[-0.04em] uppercase">
+                  THINKING
+                </motion.h1>
+              </div>
+              <div className="overflow-hidden">
+                <motion.h1 custom={1} initial="hidden" animate="visible" variants={textReveal} className="text-[12vw] md:text-[10vw] font-black tracking-[-0.04em] uppercase">
+                  BUILDING
+                </motion.h1>
+              </div>
+              <div className="overflow-hidden">
+                <motion.h1 custom={2} initial="hidden" animate="visible" variants={textReveal} className="text-[12vw] md:text-[10vw] font-black tracking-[-0.04em] uppercase">
+                  ENGINEERING
+                </motion.h1>
+              </div>
+
             </div>
+
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 1 }} className="col-span-12 md:col-span-4 flex md:justify-end md:items-start mt-4 md:mt-2">
-              <p className="text-sm font-light leading-relaxed max-w-xs text-left md:text-right opacity-70">Creative thinking and problem solving are where my mind wanders. Using my knowledge and passion for design as my medium.</p>
+<p className="mt-28 text-[11px] font-light leading-[1.75] text-right max-w-[420px] ml-auto opacity-60 pr-6">
+  Welcome to the portfolio of an engineer who enjoys solving problems.
+  Through thoughtful thinking, disciplined work, and continuous learning,
+  I build solutions designed to make a real impact.
+</p>
+
             </motion.div>
           </div>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} transition={{ delay: 1.5 }} className="absolute bottom-12 left-6 md:left-12 flex items-center gap-3 text-xs tracking-widest"><span>SCROLL</span><ArrowDown className="w-3 h-3 animate-bounce" /></motion.div>
-        </section>
-
+</section>
         {/* 2. ABOUT SECTION */}
         <section id="about" ref={containerRef} className="relative w-full min-h-screen bg-[#0a0a0a] flex flex-col justify-center py-24 z-20">
           <TornEdge />
           <InfiniteMarquee />
           <div className="w-full px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-20">
             <div className="col-span-1 md:col-span-3">
-              <p className="text-sm font-light leading-loose tracking-wide border-l border-white/20 pl-6 opacity-90">Hello, I'm Om. A senior Engineering student specializing in <strong className="text-white">Intelligent Systems</strong> and <strong className="text-white">Full Stack Architecture.</strong></p>
+              <p className="text-sm font-light leading-loose tracking-wide border-l border-white/20 pl-6 opacity-90">Hello, I'm Om. A Computer Science Engineering student specializing in <strong className="text-white">Intelligent Systems</strong> and <strong className="text-white">Full Stack Architecture.</strong></p>
             </div>
             <div className="col-span-1 md:col-span-6 flex justify-center">
-              <motion.div style={{ y: imageY }} className="w-full max-w-[400px] aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-700 shadow-2xl">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6"><span className="text-[10px] font-mono bg-black/50 px-2 py-1 backdrop-blur-md text-white/70">IMG_PROFILE.RAW</span></div>
-              </motion.div>
+              {/* IMAGE CONTAINER with smaller max-width (300px) */}
+              <div className="w-full max-w-[350px] aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative shadow-2xl">
+                <Image
+                  src="https://res.cloudinary.com/dzxxtkn16/image/upload/v1768650926/profile-portfolio_iguynx.png"
+                  alt="Om Gupta"
+                  fill
+                  className="object-cover"
+                  priority
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
+              </div>
             </div>
             <div className="col-span-1 md:col-span-3 flex justify-end"><RotatingButton /></div>
           </div>
@@ -521,6 +914,8 @@ export default function Home() {
 
         {/* 4. PROJECTS SECTION */}
         <ProjectShowcase />
+        {/* 5. NEW CONTACT FOOTER (Add this line) */}
+        <ContactSection />
 
       </div>
     </ReactLenis>
