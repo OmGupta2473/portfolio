@@ -512,10 +512,10 @@ const SkillsPhysics = () => {
   const isMouseDownRef = useRef(false);
 
   const skills = [
-    "Python", "SQL", "MongoDB", "AI Analytics", 
-    "LLM Apps", "RAG Systems", "LangChain", 
-    "LangGraph", "Streamlit", "Backend APIs", 
-    "Data Pipelines", "Automation", "Git", "Deployment"
+    "Python", "SQL", "Embeddings", "React", 
+    "LLMs", "RAG", "LangChain", 
+    "LangGraph", "Streamlit", "APIs", 
+    "Pandas", "Automation", "Git", "Deployment"
   ];
 
   useEffect(() => {
@@ -677,7 +677,7 @@ const SkillsPhysics = () => {
         <canvas ref={canvasRef} className="absolute inset-0 z-20 block" style={{ touchAction: "none" }} />
         <div className="absolute inset-0 flex items-center justify-center z-10 select-none pointer-events-none px-4 md:px-8">
           <h2 className="text-3xl md:text-6xl lg:text-6xl font-black text-white/[0.08] text-center uppercase leading-[0.9] tracking-tighter">
-            Project Types<br />I Specialize In
+            Areas I<br />Specialize In
           </h2>
         </div>
       </div>
@@ -874,12 +874,18 @@ export default function Home() {
           <TornEdge />
           <InfiniteMarquee />
           <div className="w-full px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-20">
-            <div className="col-span-1 md:col-span-3">
-              <p className="text-sm font-light leading-loose tracking-wide border-l border-white/20 pl-6 opacity-90">Hello, I'm Om. A Computer Science Engineering student specializing in <strong className="text-white">Intelligent Systems</strong> and <strong className="text-white">Full Stack Architecture.</strong></p>
+
+            {/* BIO TEXT (With your specific positioning) */}
+            <div className="col-span-1 md:col-span-3 -mt-12 md:-mt-32">
+              <p className="text-sm font-light leading-loose tracking-wide border-l border-white/20 pl-6 opacity-90">
+                Hello, I’m Om. A Computer Science Engineering student who enjoys solving complex problems by building intelligent, data-driven systems using <strong className="text-white">Generative AI</strong> and <strong className="text-white">modern full-stack technologies.</strong>
+              </p>
             </div>
+
+            {/* IMAGE CONTAINER (Updated for Mobile Size) */}
             <div className="col-span-1 md:col-span-6 flex justify-center">
-              {/* IMAGE CONTAINER */}
-              <div className="w-full max-w-[350px] aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative shadow-2xl">
+              {/* CHANGE IS HERE: max-w-[220px] for mobile, md:max-w-[350px] for desktop */}
+              <div className="w-full max-w-[245px] md:max-w-[350px] aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative shadow-2xl">
                 <Image
                   src="https://res.cloudinary.com/dzxxtkn16/image/upload/v1768650926/profile-portfolio_iguynx.png"
                   alt="Om Gupta"
@@ -891,10 +897,11 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
               </div>
             </div>
+
+            {/* ROTATING BUTTON */}
             <div className="col-span-1 md:col-span-3 flex justify-end"><RotatingButton /></div>
           </div>
         </section>
-
         {/* 3. SKILLS SECTION */}
         <section id="skills" className="relative z-30 w-full bg-[#0a0a0a]">
            <SkillsPhysics />
