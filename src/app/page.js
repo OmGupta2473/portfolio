@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, memo } from "react";
 import { motion, useScroll, useTransform, useInView, AnimatePresence, useMotionValue, useSpring, useVelocity } from "framer-motion";
-import { ArrowDown, ArrowUpRight, ExternalLink, Github, X, ChevronRight, Globe } from "lucide-react"; 
+import { ArrowDown, ArrowUpRight, ExternalLink, Github, X, ChevronRight, Globe, Shield, Cpu, Layers, Zap, Instagram, Linkedin } from "lucide-react";
 import { ReactLenis, useLenis } from "lenis/react";
 import Matter from "matter-js";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -16,80 +16,198 @@ const projects = [
   {
     id: 1,
     title: "Enterprise AI Agent",
-    category: "AI Architecture",
-    stack: ["Python", "LangChain", "ChromaDB", "Docker"],
+    category: "Secure Multi-Agent System",
+    stack: ["Python", "LangChain", "Streamlit", "ChromaDB", "Docker"],
     color: "#3b82f6",
-    description: "A scalable RAG system for enterprise data retrieval.",
-    longDescription: "Designed a centralized knowledge retrieval system for a large-scale enterprise. The system ingests thousands of PDFs, Docs, and internal wiki pages into a vector database.",
-    challenge: "The primary challenge was handling latency with large-scale vector retrieval while maintaining context accuracy across 100+ document pages.",
-    images: [
-      "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=2000",
-      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=2000"
+    // PRO CONTENT FIELDS
+    isPro: true, // Flag to trigger new layout
+    overview: "A secure, production-oriented multi-agent AI system designed to handle both structured enterprise data (CSV) and unstructured documents (PDF/Policy Docs), with strict guardrails, deterministic computation, and fault tolerance. This is not a chatbot — it’s an Agent-of-Agents architecture built for real enterprise constraints.",
+    challenge: "Enterprises often have diverse data types and high accuracy requirements. Large language models (LLMs) can hallucinate or produce inconsistent results when performing computations or data retrieval across structured and unstructured data.",
+    whatItDoes: [
+      { title: "Manager Agent", desc: "Directs queries to specialized sub-agents." },
+      { title: "Analyst Agent", desc: "Performs safe, deterministic calculation tasks on CSV data — ensuring math results are exact." },
+      { title: "Librarian Agent", desc: "Runs a RAG search over unstructured documents (PDF/policies) using FlashRank re-ranking." },
+      { title: "Security Guardrails", desc: "Prevent malicious or unsafe operations before the query reaches the LLM." }
     ],
-    link: "#"
+    engineering: [
+      "Deterministic Analytics Pipeline – LLM generates code, but Pandas executes it in a sandbox to guarantee real numeric results.",
+      "Dual-Mode Analyst – Intelligent decision between safe and advanced modes to optimize cost.",
+      "Hot-Swap Data Architecture – Reloads input files on every query to avoid stale state.",
+      "Tie-Aware Ranking Logic – Ensures correct business insights."
+    ],
+    impact: [
+      "Accurate analytics on enterprise CSV data without hallucination.",
+      "Search & retrieval across enterprise policies with high relevance.",
+      "Strong guardrails for secure execution in real workflows."
+    ],
+    images: [], // No images for this project as requested
+    link: "https://github.com/OmGupta2473/enterprise-agent",
+
+    // CHANGE 2: Add this new line for the Live Demo URL
+    demo: "https://enterprise-agent.onrender.com/"
   },
   {
     id: 2,
     title: "Moonz Nail Store",
-    category: "E-Commerce",
-    stack: ["React", "Firebase", "Firestore", "Vercel"],
-    color: "#ec4899",
-    description: "Full-stack booking & e-commerce platform.",
-    longDescription: "A bespoke e-commerce solution tailored for a boutique nail salon. Features include real-time appointment scheduling, inventory management, and a custom CMS.",
-    challenge: "Synchronizing physical store availability with online bookings in real-time to prevent double-booking slots.",
+    category: "Full Stack E-Commerce",
+    stack: ["React 18", "Firebase Auth", "Firestore", "Tailwind", "Vite"],
+    color: "#ec4899", // Pink color for the brand
+    
+    // --- PRO MODE ENABLED ---
+    isPro: true,
+    
+    overview: "A modern, fully functional e-commerce web application for selling nail products (press-ons, gels, bridal sets). It features a complete shopping experience with authentication, product catalog, cart, orders, coupons, and role-based admin controls — bridging the gap between a static site and a real business tool.",
+    
+    challenge: "The main challenge was implementing real-world e-commerce logic—such as cart state persistence, secure order workflows, and dynamic coupon validation—entirely within a serverless architecture while ensuring admin actions remained secure.",
+    
+    whatItDoes: [
+      { title: "Customer App", desc: "Browse products, manage cart, place orders, and track history." },
+      { title: "Admin Dashboard", desc: "Role-protected interface to add/edit products and manage customer orders." },
+      { title: "Smart Cart & Checkout", desc: "Persisted cart state with address management and coupon logic (e.g., 'MOON200')." },
+      { title: "Secure Auth", desc: "Google Sign-In integration powered by Firebase Authentication." }
+    ],
+    
+    engineering: [
+      "SPA Architecture – Built with React 18 & Vite for instant page transitions and high performance.",
+      "Real-Time Database – Uses Firestore to sync product inventory and user orders instantly.",
+      "Role-Based Access Control (RBAC) – Custom logic restricts admin dashboard access to specific email configurations.",
+      "Dynamic Pricing Engine – Frontend logic handles coupon validation and total calculations securely."
+    ],
+    
+    impact: [
+      "Delivered a complete, deployable store with end-to-end order flow.",
+      "Solved real business needs: inventory management and secure payments.",
+      "Demonstrated full-stack capability: Frontend (React) + Backend-as-a-Service (Firebase)."
+    ],
+
+    // UPDATED LINKS
+    link: "https://github.com/OmGupta2473/moonz-nail-store",
+    demo: "https://moonz-nail-store.vercel.app/",
+    
+    // Images are hidden in Pro Mode, but kept here for backup
     images: [
       "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=2000",
       "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=2000"
     ],
-    link: "#"
   },
   {
     id: 3,
-    title: "AI PDF Query Tool",
-    category: "SaaS Tool",
-    stack: ["Python", "LangChain", "Streamlit"],
-    color: "#f97316",
-    description: "Intelligent document analysis tool.",
-    longDescription: "A SaaS tool allowing users to upload legal contracts and ask complex questions. The AI highlights specific clauses and checks for compliance risks.",
-    challenge: "Parsing complex PDF layouts with tables and multi-column text accurately.",
-    images: ["https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=2000"],
-    link: "#"
+    title: "File Analysis AI Query System",
+    category: "AI Document Intelligence",
+    stack: ["Python", "FastAPI", "LangChain", "ChromaDB", "OpenAI"],
+    color: "#f97316", // Orange
+    
+    // --- PRO MODE ENABLED ---
+    isPro: true,
+    
+    overview: "A smart AI-powered document analysis and retrieval tool that lets users ask natural language questions about a variety of files — including PDFs, Word docs, and Excel spreadsheets — and receive accurate, context-aware answers using vector embeddings and Large Language Models.",
+    
+    challenge: "The core engineering challenge was building a unified parsing pipeline that could extract meaningful text from diverse formats (tables in Excel, headers in Word) without losing structural context, while balancing retrieval speed with answer accuracy.",
+    
+    whatItDoes: [
+      { title: "Multi-Format Ingestion", desc: "Parses PDF, Word, and Excel files automatically for indexing." },
+      { title: "Natural Language QA", desc: "Users ask questions like 'What is the quarterly growth?' and get factual answers." },
+      { title: "RAG Architecture", desc: "Retrieves relevant document chunks using ChromaDB before generating responses." },
+      { title: "FastAPI Backend", desc: "High-performance API endpoints for document upload and querying." }
+    ],
+    
+    engineering: [
+      "Unified Parsing Strategy – custom parsers to handle structure preservation across different file types.",
+      "Latency Optimization – Optimized vector retrieval to balance speed against the depth of context.",
+      "Hallucination Reduction – strictly grounds LLM responses in retrieved context only."
+    ],
+    
+    impact: [
+      "Enables enterprise knowledge search across policy docs and manuals.",
+      "Automates academic research analysis and business reporting.",
+      "Demonstrates production-ready backend architecture for AI search."
+    ],
+
+    // UPDATED LINKS
+    link: "https://github.com/OmGupta2473/File-Analysis-AI-Query-System",
+    demo: null, // SET TO NULL TO HIDE BUTTON
+    
+    images: [],
   },
   {
     id: 4,
-    title: "AI Chatbot App",
-    category: "Mobile Dev",
-    stack: ["React Native", "LLM APIs", "AsyncStorage"],
-    color: "#10b981",
-    description: "Cross-platform mobile assistant.",
-    longDescription: "A personal assistant app that runs a quantized LLM locally on the device for privacy, syncing only essential metadata to the cloud.",
-    challenge: "Optimizing the model to run smoothly on older Android devices without draining battery.",
-    images: ["https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=2000"],
-    link: "#"
+    title: "AI Chat Integration",
+    category: "Cross-Platform Mobile AI",
+    stack: ["React Native", "Expo", "Groq API", "AsyncStorage"],
+    color: "#10b981", // Emerald Green
+    
+    // --- PRO MODE ENABLED ---
+    isPro: true,
+    
+    overview: "A cross-platform AI chat application built with React Native and Expo that lets users interact with an AI assistant in a fully native mobile environment. Designed to demonstrate real mobile AI integration skills, combining a polished frontend UX with powerful AI capabilities.",
+    
+    challenge: "The main challenge was ensuring a seamless, low-latency chat experience across Android, iOS, and Web while effectively managing state persistence and API integrations in a mobile-constrained environment.",
+    
+    whatItDoes: [
+      { title: "AI-Powered Interface", desc: "Intuitive mobile chat UI integrated with Groq SDK for intelligent responses." },
+      { title: "Cross-Platform Core", desc: "Unified codebase running smoothly on Android, iOS, and Web via Expo." },
+      { title: "Persistent Storage", desc: "Uses AsyncStorage to save chat history and user sessions across restarts." },
+      { title: "Interactive UX", desc: "Features draggable elements and smooth stack navigation transitions." }
+    ],
+    
+    engineering: [
+      "Unified Codebase – Leveraged React Native & Expo to deploy to three platforms from a single source.",
+      "Local State Management – Implemented AsyncStorage to persist chat context without heavy backend overhead.",
+      "Optimized API Handling – Integrated Groq API for high-speed inference suited for mobile interactions.",
+      "Responsive Mobile UI – utilized React Native Paper for consistent, adaptive design elements."
+    ],
+    
+    impact: [
+      "Demonstrates end-to-end mobile development from UI design to AI integration.",
+      " showcases practical use of cross-platform frameworks for rapid deployment.",
+      "Provides a reusable architecture for future mobile AI assistants."
+    ],
+
+    // UPDATED LINKS
+    link: "https://github.com/OmGupta2473/AIChatIntegration",
+    demo: null, // Hides the Live Demo button automatically
+    
+    images: [],
   },
-  {
+ {
     id: 5,
-    title: "Risk Model",
-    category: "Data Science",
-    stack: ["Python", "Scikit-learn", "Pandas"],
-    color: "#ef4444",
-    description: "Predictive modeling for financial risks.",
-    longDescription: "Built a regression model to predict stock volatility based on 10 years of historical market data and sentiment analysis from news APIs.",
-    challenge: "Cleaning noisy financial data and preventing overfitting on historical trends.",
-    images: ["https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&q=80&w=2000"],
-    link: "#"
-  },
-  {
-    id: 6,
-    title: "CSV AI Agent",
-    category: "Analytics",
-    stack: ["Python", "Streamlit", "Groq API"],
-    color: "#8b5cf6",
-    description: "RAG-based Q&A agent for CSVs.",
-    longDescription: "An agent that converts natural language questions into Pandas code to analyze uploaded CSV files instantly.",
-    challenge: "Ensuring the generated Python code is safe to execute and handles edge cases.",
-    images: ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000"],
-    link: "#"
+    title: "Credit Risk Analysis",
+    category: "AI Financial Risk Predictor",
+    stack: ["Python", "Streamlit", "Scikit-Learn", "Random Forest", "Pandas"],
+    color: "#ef4444", // Red (fitting for "Risk")
+    
+    // --- PRO MODE ENABLED ---
+    isPro: true,
+    
+    overview: "A machine-learning powered financial risk prediction system that analyzes individual financial input and predicts whether a loan applicant is Low Risk (Approved) or High Risk (Rejected). Built with an interactive Streamlit UI and a trained Random Forest Classifier, this project integrates a real prediction model with user-friendly visual interaction.",
+    
+    challenge: "The main challenge was transforming standard dataset analysis into a real-interaction UI while ensuring the model provided interpretable confidence scores rather than just binary outputs, bridging the gap between raw ML predictions and usable financial decision support.",
+    
+    whatItDoes: [
+      { title: "Interactive Predictor", desc: "Users input financial details via Streamlit; app outputs risk prediction with confidence scores." },
+      { title: "ML Backend", desc: "Powered by a Random Forest Classifier trained on the German Credit Dataset." },
+      { title: "Confidence Scoring", desc: "Displays certainty levels (e.g., >65% → Approved) to explain decision reasoning." },
+      { title: "Smart Preprocessing", desc: "Real-time feature encoding ensures inputs match the training data pipeline." }
+    ],
+    
+    engineering: [
+      "Feature Engineering – Derived monthly payment ratios from loan amount and duration for better predictive power.",
+      "Confidence Thresholding – Implemented logic to display prediction certainty, a key requirement in risk modeling.",
+      "Streamlit Interface – Created a clean, user-friendly frontend to make the ML model accessible to non-technical users.",
+      "End-to-End Pipeline – Integrated data preprocessing, encoding, and inference into a seamless application flow."
+    ],
+    
+    impact: [
+      "Transforms static dataset analysis into a functional, interactive financial tool.",
+      "Demonstrates full-cycle ML skills: from EDA and model training to interface deployment.",
+      "Provides clear, confidence-based decision support for basic loan screening."
+    ],
+
+    // UPDATED LINKS
+    link: "https://github.com/OmGupta2473/credit-risk-analysis",
+    demo: null, // Hides the Live Demo button automatically
+    
+    images: [],
   },
 ];
 
@@ -137,22 +255,27 @@ const LaptopModel = memo(({ activeProject }) => {
   );
 }, (prevProps, nextProps) => prevProps.activeProject.id === nextProps.activeProject.id);
 
-// --- 3. PROJECT DETAIL MODAL ---
+// --- 3. PROJECT DETAIL MODAL (UPDATED WITH PRO LAYOUT) ---
 const ProjectDetailModal = ({ project, onClose }) => {
   const lenis = useLenis();
 
   useEffect(() => {
-    if (lenis) {
-      lenis.stop();
-    }
-    return () => {
-      if (lenis) {
-        lenis.start();
-      }
-    };
+    if (lenis) lenis.stop();
+    return () => { if (lenis) lenis.start(); };
   }, [lenis]);
 
   if (!project) return null;
+
+  // Animation variants for staggered text
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
 
   return (
     <>
@@ -161,17 +284,19 @@ const ProjectDetailModal = ({ project, onClose }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/80 z-[90] lg:hidden backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 z-[90] backdrop-blur-sm"
       />
 
       <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-20 bottom-10 right-10 z-[100] w-[92%] lg:w-[45%] bg-[#111] shadow-2xl overflow-hidden flex flex-col rounded-[2rem] border border-white/10" 
+        className="fixed z-[100] bg-[#111] shadow-2xl flex flex-col overflow-hidden border border-white/10
+                   inset-x-8 top-20 bottom-20 rounded-3xl 
+                   lg:top-10 lg:bottom-10 lg:right-10 lg:left-auto lg:w-[45%] lg:h-auto lg:rounded-[2rem]" 
       >
-        <div className="flex items-center justify-between p-6 md:p-8 bg-[#111] z-20 border-b border-white/5">
+        <div className="flex items-center justify-between p-5 md:p-8 bg-[#111] z-20 border-b border-white/5 shrink-0">
            <div className="flex gap-2">
               <button 
                 onClick={onClose}
@@ -192,15 +317,16 @@ const ProjectDetailModal = ({ project, onClose }) => {
         </div>
 
         <div 
-          className="flex-1 overflow-y-auto p-6 md:p-10 no-scrollbar"
+          className="flex-1 overflow-y-auto p-5 md:p-10 no-scrollbar overscroll-contain"
           data-lenis-prevent 
         >
-           <div className="mb-10">
+           {/* HEADER SECTION */}
+           <div className="mb-8 md:mb-10">
               <motion.span 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-xs font-bold uppercase tracking-[0.2em] text-blue-400 mb-4 block"
+                className="text-xs font-bold uppercase tracking-[0.2em] text-blue-400 mb-3 md:mb-4 block"
                 style={{ color: project.color }}
               >
                 {project.category}
@@ -210,12 +336,12 @@ const ProjectDetailModal = ({ project, onClose }) => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl md:text-6xl font-serif text-white mb-6 leading-tight"
+                className="text-3xl md:text-5xl font-serif text-white mb-4 md:mb-6 leading-tight"
               >
                 {project.title}
               </motion.h1>
 
-              <div className="flex flex-wrap gap-2 mb-8">
+              <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
                 {project.stack.map(tech => (
                   <span key={tech} className="px-3 py-1 border border-white/10 rounded-full text-[10px] uppercase tracking-widest text-white/50">
                     {tech}
@@ -224,56 +350,124 @@ const ProjectDetailModal = ({ project, onClose }) => {
               </div>
            </div>
 
-           <div className="w-full h-[1px] bg-white/10 mb-10" />
+           <div className="w-full h-[1px] bg-white/10 mb-8 md:mb-10" />
 
-           <div className="grid grid-cols-1 gap-12 mb-16">
-              <div>
-                 <h3 className="text-xl text-white font-medium mb-4">Overview</h3>
-                 <p className="text-white/60 leading-relaxed text-sm md:text-base">
-                    {project.longDescription}
-                 </p>
-              </div>
-              
-              <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
-                 <h3 className="text-sm font-bold uppercase tracking-widest text-white/90 mb-3 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-500" /> The Challenge
-                 </h3>
-                 <p className="text-white/60 leading-relaxed text-sm">
-                    {project.challenge}
-                 </p>
-              </div>
-           </div>
+           {/* CONDITIONAL CONTENT RENDERING */}
+           {project.isPro ? (
+             <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-12">
+               
+               {/* 1. OVERVIEW */}
+               <motion.div variants={itemVariants}>
+                 <h3 className="text-xl text-white font-medium mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-blue-400" /> Overview</h3>
+                 <p className="text-white/70 leading-relaxed text-base">{project.overview}</p>
+               </motion.div>
 
-           <div className="flex flex-col gap-6">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-white/30">Project Gallery</h3>
-              {project.images?.map((img, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="relative w-full aspect-[16/10] bg-neutral-900 rounded-lg overflow-hidden border border-white/5 group"
-                >
-                   <Image 
-                     src={img}
-                     alt="Project detail"
-                     fill
-                     className="object-cover transition-transform duration-700 group-hover:scale-105"
-                     unoptimized
-                   />
-                </motion.div>
-              ))}
-           </div>
+               {/* 2. CHALLENGE */}
+               <motion.div variants={itemVariants} className="p-6 bg-white/5 rounded-2xl border border-white/5">
+                 <h3 className="text-sm font-bold uppercase tracking-widest text-red-400 mb-3">The Challenge</h3>
+                 <p className="text-white/80 leading-relaxed text-sm">{project.challenge}</p>
+               </motion.div>
+
+               {/* 3. WHAT IT DOES (Grid) */}
+               <motion.div variants={itemVariants}>
+                 <h3 className="text-xl text-white font-medium mb-6 flex items-center gap-2"><Cpu className="w-5 h-5 text-purple-400" /> Architecture & Agents</h3>
+                 <div className="grid gap-4">
+                   {project.whatItDoes.map((item, i) => (
+                     <div key={i} className="p-4 bg-[#1a1a1a] rounded-xl border border-white/5">
+                       <h4 className="text-white font-bold mb-1">{item.title}</h4>
+                       <p className="text-white/50 text-sm">{item.desc}</p>
+                     </div>
+                   ))}
+                 </div>
+               </motion.div>
+
+                {/* 4. ENGINEERING DECISIONS */}
+                <motion.div variants={itemVariants}>
+                 <h3 className="text-xl text-white font-medium mb-6 flex items-center gap-2"><Layers className="w-5 h-5 text-green-400" /> Key Engineering Decisions</h3>
+                 <ul className="space-y-4">
+                   {project.engineering.map((item, i) => (
+                     <li key={i} className="flex gap-3 text-sm text-white/70">
+                       <span className="min-w-[6px] h-[6px] mt-2 rounded-full bg-green-500" />
+                       {item}
+                     </li>
+                   ))}
+                 </ul>
+               </motion.div>
+
+               {/* 5. IMPACT */}
+               <motion.div variants={itemVariants}>
+                 <h3 className="text-xl text-white font-medium mb-6 flex items-center gap-2"><Zap className="w-5 h-5 text-yellow-400" /> Impact</h3>
+                 <ul className="space-y-3">
+                   {project.impact.map((item, i) => (
+                     <li key={i} className="flex gap-3 text-sm text-white/70">
+                        <span className="text-yellow-500">➜</span> {item}
+                     </li>
+                   ))}
+                 </ul>
+               </motion.div>
+
+             </motion.div>
+           ) : (
+             // STANDARD LAYOUT FOR OTHER PROJECTS
+             <>
+               <div className="grid grid-cols-1 gap-8 md:gap-12 mb-12 md:mb-16">
+                  <div>
+                     <h3 className="text-lg md:text-xl text-white font-medium mb-3 md:mb-4">Overview</h3>
+                     <p className="text-white/60 leading-relaxed text-sm md:text-base">
+                        {project.longDescription}
+                     </p>
+                  </div>
+                  
+                  <div className="p-5 md:p-6 bg-white/5 rounded-2xl border border-white/5">
+                     <h3 className="text-xs md:text-sm font-bold uppercase tracking-widest text-white/90 mb-3 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500" /> The Challenge
+                     </h3>
+                     <p className="text-white/60 leading-relaxed text-sm">
+                        {project.challenge}
+                     </p>
+                  </div>
+               </div>
+
+               {/* Gallery only shows if images exist */}
+               {project.images && project.images.length > 0 && (
+                 <div className="flex flex-col gap-6">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-white/30">Project Gallery</h3>
+                    {project.images.map((img, i) => (
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="relative w-full aspect-video bg-neutral-900 rounded-lg overflow-hidden border border-white/5 group"
+                      >
+                         <Image 
+                           src={img}
+                           alt="Project detail"
+                           fill
+                           className="object-cover transition-transform duration-700 group-hover:scale-105"
+                           unoptimized
+                         />
+                      </motion.div>
+                    ))}
+                 </div>
+               )}
+             </>
+           )}
 
            <div className="h-20" />
-           <div className="flex gap-4">
-               <a href={project.link} target="_blank" className="flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-neutral-200 transition-colors">
-                  <Github className="w-4 h-4" /> View Code
-               </a>
-               <a href="#" className="flex items-center gap-2 px-6 py-3 border border-white/20 text-white font-bold rounded-lg hover:bg-white/10 transition-colors">
-                  <Globe className="w-4 h-4" /> Live Demo
-               </a>
-            </div>
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* View Code - Always Shows */}
+            <a href={project.link} target="_blank" className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-neutral-200 transition-colors w-full md:w-auto">
+              <Github className="w-4 h-4" /> View Code
+            </a>
+
+            {/* Live Demo - ONLY Shows if project.demo is not null */}
+            {project.demo && (
+              <a href={project.demo} target="_blank" className="flex items-center justify-center gap-2 px-6 py-3 border border-white/20 text-white font-bold rounded-lg hover:bg-white/10 transition-colors w-full md:w-auto">
+                <Globe className="w-4 h-4" /> Live Demo
+              </a>
+            )}
+          </div>
         </div>
       </motion.div>
     </>
@@ -425,9 +619,10 @@ const CustomCursor = () => {
   );
 };
 
-// --- 6. FLOATING NAVBAR ---
+// --- FLOATING NAVBAR (FIXED BEHAVIOR) ---
 const FloatingNavbar = () => {
   const [activeTab, setActiveTab] = useState("About");
+  const isClickScrolling = useRef(false); // Flag to track if we are auto-scrolling
 
   const tabs = [
     { name: "About", href: "#about" },
@@ -437,6 +632,10 @@ const FloatingNavbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
+      // 1. IF WE ARE SCROLLING VIA CLICK, IGNORE THIS FUNCTION
+      if (isClickScrolling.current) return;
+
+      // 2. STANDARD SCROLL TRACKING LOGIC
       const scrollPosition = window.scrollY + window.innerHeight / 2;
 
       for (const tab of tabs) {
@@ -453,6 +652,7 @@ const FloatingNavbar = () => {
         }
       }
       
+      // Bottom safety check
       const projectsSection = document.getElementById("projects");
       if (projectsSection) {
          if (window.scrollY > projectsSection.offsetTop + projectsSection.offsetHeight) {
@@ -462,30 +662,43 @@ const FloatingNavbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-    handleScroll();
+    handleScroll(); // Initial check
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleTabClick = (e, tab) => {
+    e.preventDefault();
+    
+    // 1. SET ACTIVE TAB IMMEDIATELY
+    setActiveTab(tab.name);
+    
+    // 2. DISABLE SCROLL LISTENER
+    isClickScrolling.current = true;
+
+    const element = document.getElementById(tab.href.substring(1));
+    if (element) {
+       window.scrollTo({
+         top: element.offsetTop,
+         behavior: "smooth"
+       });
+    }
+
+    // 3. RE-ENABLE SCROLL LISTENER AFTER 1 SECOND (Approx time for scroll to finish)
+    setTimeout(() => {
+      isClickScrolling.current = false;
+    }, 1000);
+  };
+
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] md:w-auto max-w-[400px]">
-      <div className="flex items-center justify-between p-1.5 bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
+    <div className="fixed top-6 md:top-6 left-1/2 -translate-x-1/2 z-50 w-[85%] md:w-auto max-w-[400px]">
+      <div className="flex items-center justify-between p-1 md:p-1.5 bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
         {tabs.map((tab) => (
           <a
             key={tab.name}
             href={tab.href}
-            onClick={(e) => {
-              e.preventDefault();
-              setActiveTab(tab.name);
-              const element = document.getElementById(tab.href.substring(1));
-              if (element) {
-                 window.scrollTo({
-                   top: element.offsetTop,
-                   behavior: "smooth"
-                 });
-              }
-            }}
-            className={`relative px-4 md:px-6 py-2.5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-widest transition-colors duration-300 flex-1 text-center ${
+            onClick={(e) => handleTabClick(e, tab)}
+            className={`relative px-3 py-2 md:px-6 md:py-2.5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-widest transition-colors duration-300 flex-1 text-center ${
               activeTab === tab.name ? "text-white" : "text-white/60 hover:text-white"
             }`}
           >
@@ -512,10 +725,10 @@ const SkillsPhysics = () => {
   const isMouseDownRef = useRef(false);
 
   const skills = [
-    "Python", "SQL", "Embeddings", "React", 
-    "LLMs", "RAG", "LangChain", 
-    "LangGraph", "Streamlit", "APIs", 
-    "Pandas", "Automation", "Git", "Deployment"
+    "Python", "SQL", "MongoDB", "AI Analytics", 
+    "LLM Apps", "RAG Systems", "LangChain", 
+    "LangGraph", "Streamlit", "Backend APIs", 
+    "Data Pipelines", "Automation", "Git", "Deployment"
   ];
 
   useEffect(() => {
@@ -677,7 +890,7 @@ const SkillsPhysics = () => {
         <canvas ref={canvasRef} className="absolute inset-0 z-20 block" style={{ touchAction: "none" }} />
         <div className="absolute inset-0 flex items-center justify-center z-10 select-none pointer-events-none px-4 md:px-8">
           <h2 className="text-3xl md:text-6xl lg:text-6xl font-black text-white/[0.08] text-center uppercase leading-[0.9] tracking-tighter">
-            Areas I<br />Specialize In
+            Project Types<br />I Specialize In
           </h2>
         </div>
       </div>
@@ -754,67 +967,101 @@ function RotatingButton() {
 // --- 9. CONTACT SECTION ---
 const ContactSection = () => {
   return (
-    <section className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden z-20">
+    // Kept 'pt-32' for top spacing, adjusted 'pb-20' to 'pb-16' for tighter bottom
+    <section className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden z-20 pt-32 pb-16">
       
       {/* Background Gradient Spotlights */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent opacity-40 pointer-events-none" />
 
       {/* Main Content */}
       <div className="relative z-10 flex flex-col items-center gap-6 text-center">
+        
+        {/* SMALL LABEL - Reduced mobile size to text-[10px] */}
         <motion.span 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-white/40"
+          className="text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] text-white/60 mb-[-10px] relative z-20"
         >
           Got a project in mind?
         </motion.span>
         
-        <div className="overflow-hidden">
+        {/* MASSIVE HEADLINE - Reduced mobile size from 13vw to 10vw */}
+        <div className="overflow-hidden relative z-10">
           <motion.h2 
             initial={{ y: "100%" }}
             whileInView={{ y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-[12vw] leading-[0.85] font-black uppercase text-white tracking-tighter"
+            className="text-[10vw] md:text-[12vw] leading-[0.8] font-black uppercase text-white tracking-tighter"
           >
             Let's Connect
           </motion.h2>
         </div>
 
-        {/* Circular Interactive Button */}
+        {/* Circular Interactive Button - Adjusted margin */}
         <motion.a 
-          href="mailto:omgupta@example.com"
+          href="mailto:omgupta24733@gmail.com"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="relative mt-12 w-32 h-32 md:w-40 md:h-40 rounded-full bg-white flex items-center justify-center cursor-pointer group overflow-hidden"
+          className="relative mt-2 md:mt-4 w-28 h-28 md:w-40 md:h-40 rounded-full bg-white flex items-center justify-center cursor-pointer group overflow-hidden z-20"
         >
           <div className="absolute inset-0 bg-neutral-200 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full origin-center ease-out" />
           
           <div className="relative z-10 flex flex-col items-center gap-1 transition-transform duration-300 group-hover:-translate-y-[150%]">
-             <span className="text-[10px] font-bold uppercase tracking-widest text-black">Write a</span>
-             <span className="text-[10px] font-bold uppercase tracking-widest text-black">Message</span>
+             <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-black">Write a</span>
+             <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-black">Message</span>
           </div>
           
           <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[150%] group-hover:translate-y-0 transition-transform duration-300">
-             <ArrowUpRight className="w-8 h-8 text-black" />
+             <ArrowUpRight className="w-6 h-6 md:w-8 md:h-8 text-black" />
           </div>
         </motion.a>
+
+        {/* Centered Social Links - Reduced margin and icon sizes for mobile */}
+        <div className="flex items-center gap-6 md:gap-8 mt-6 md:mt-8 relative z-20">
+            <a 
+              href="https://github.com/OmGupta2473" 
+              target="_blank" 
+              className="group flex flex-col items-center gap-2 text-white/50 hover:text-white transition-colors"
+            >
+              <div className="p-3 md:p-4 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors border border-white/5 group-hover:border-white/20">
+                <Github className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10">Github</span>
+            </a>
+
+            <a 
+              href="https://www.linkedin.com/in/om-gupta-265b80268/" 
+              target="_blank" 
+              className="group flex flex-col items-center gap-2 text-white/50 hover:text-blue-400 transition-colors"
+            >
+              <div className="p-3 md:p-4 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors border border-white/5 group-hover:border-blue-400/30">
+                <Linkedin className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 text-blue-400">LinkedIn</span>
+            </a>
+
+            <a 
+              href="https://www.instagram.com/omguptaa.__?igsh=Nmp3azduOHlmOTky&utm_source=qr" 
+              target="_blank" 
+              className="group flex flex-col items-center gap-2 text-white/50 hover:text-pink-400 transition-colors"
+            >
+              <div className="p-3 md:p-4 bg-white/5 rounded-full group-hover:bg-white/10 transition-colors border border-white/5 group-hover:border-pink-400/30">
+                <Instagram className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 text-pink-400">Instagram</span>
+            </a>
+        </div>
+
       </div>
 
-      {/* Footer Bottom Bar */}
-      <div className="absolute bottom-8 w-full px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-white/30">
-         <span className="hidden md:block">Connect with me on social</span>
-         <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition-colors duration-300">Instagram</a>
-            <a href="#" className="hover:text-white transition-colors duration-300">Twitter</a>
-            <a href="#" className="hover:text-white transition-colors duration-300">LinkedIn</a>
-         </div>
-         <span className="md:hidden">© 2026 Om Gupta</span>
+      {/* Footer Bottom Text */}
+      <div className="absolute bottom-4 md:bottom-8 w-full text-center">
+         <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/20">© 2026 Om Gupta</span>
       </div>
     </section>
   );
 };
-
 // --- 10. MAIN PAGE LAYOUT ---
 export default function Home() {
   const containerRef = useRef(null);
@@ -839,7 +1086,6 @@ export default function Home() {
           <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-y-4">
             <div className="col-span-12 md:col-span-8 flex flex-col items-start leading-[0.85]">
 
-              {/* UPDATED: Changed text size from [12vw] to [9vw] */}
               <div className="overflow-hidden">
                 <motion.h1 custom={0} initial="hidden" animate="visible" variants={textReveal} className="text-[12vw] md:text-[10vw] font-black tracking-[-0.04em] uppercase">
                   THINKING
@@ -875,16 +1121,13 @@ export default function Home() {
           <InfiniteMarquee />
           <div className="w-full px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-20">
 
-            {/* BIO TEXT (With your specific positioning) */}
             <div className="col-span-1 md:col-span-3 -mt-12 md:-mt-32">
               <p className="text-sm font-light leading-loose tracking-wide border-l border-white/20 pl-6 opacity-90">
                 Hello, I’m Om. A Computer Science Engineering student who enjoys solving complex problems by building intelligent, data-driven systems using <strong className="text-white">Generative AI</strong> and <strong className="text-white">modern full-stack technologies.</strong>
               </p>
             </div>
 
-            {/* IMAGE CONTAINER (Updated for Mobile Size) */}
             <div className="col-span-1 md:col-span-6 flex justify-center">
-              {/* CHANGE IS HERE: max-w-[220px] for mobile, md:max-w-[350px] for desktop */}
               <div className="w-full max-w-[245px] md:max-w-[350px] aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative shadow-2xl">
                 <Image
                   src="https://res.cloudinary.com/dzxxtkn16/image/upload/v1768650926/profile-portfolio_iguynx.png"
@@ -898,10 +1141,10 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ROTATING BUTTON */}
             <div className="col-span-1 md:col-span-3 flex justify-end"><RotatingButton /></div>
           </div>
         </section>
+
         {/* 3. SKILLS SECTION */}
         <section id="skills" className="relative z-30 w-full bg-[#0a0a0a]">
            <SkillsPhysics />
